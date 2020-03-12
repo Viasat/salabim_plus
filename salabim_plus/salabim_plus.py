@@ -175,7 +175,7 @@ class EntityGenerator(sim.Component):
         """
         
         while True:
-            yield self.wait((self.ordered_qty, '$ > 0'))
+            yield self.wait((self.ordered_qty, lambda v, c, s: v > 0))
             if self.bom:
                 yield from self.check_bom_inv()
             yield from self.fulfill_order()      
@@ -187,7 +187,7 @@ class EntityGenerator(sim.Component):
         
         while True:
             yield self.wait(
-                (self.tracker.wip_count, '$ <'+str(self.inv_level))
+                (self.tracker.wip_count, lambda v, c, s: v < self.inv_level))
             )
             if self.bom:
                 yield from self.check_bom_inv()
@@ -252,7 +252,8 @@ class EntityGenerator(sim.Component):
         """
         
         bom_requirements = [
-            (details['location'].count, '$ < '+str(details['qty'])) # <---BUG?? conditional is flipped to correctly honor
+            # (details['location'].count, '$ < '+str(details['qty'])) # <---BUG?? conditional is flipped to correctly honor
+            (details['location'].count, lambda v, c, s: v < details['qty'])
             for part, details in self.bom.items()
         ]
 #         print(bom_requirements)
@@ -981,7 +982,7 @@ class Kanban(sim.Component):
             self.update_inv()
 
         while True:
-            yield self.wait((self.total_inv, '$ <'+str(self.order_point))) # wait until the inventory level falls below the indicated threshold
+            yield self.wait((self.total_inv, lambda v, c, s: v < self.order_point)) # wait until the inventory level falls below the indicated threshold
             self.order_gen.send_order(self.order_qty)
             self.entity_ordered(self.order_qty)
 
