@@ -11,7 +11,7 @@ with open('LICENSE') as f:
 
 setup(
     name='salabim_plus',
-    version='0.0.dev1',
+    version='0.0.dev2',
     description='Package for running more complex processes using salabim',
     long_description=readme,
     author='Jack Nelson',
@@ -22,6 +22,6 @@ setup(
     install_requires=[
         'pandas>=1.0.1',
         'plotly>=4.4.1',
-        'salabim>=19.0.10'
+        'salabim>=20.0.1'
     ]
 )

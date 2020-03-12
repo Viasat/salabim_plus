@@ -187,7 +187,7 @@ class EntityGenerator(sim.Component):
         
         while True:
             yield self.wait(
-                (self.tracker.wip_count, lambda v, c, s: v < self.inv_level))
+                (self.tracker.wip_count, lambda v, c, s: v < self.inv_level)
             )
             if self.bom:
                 yield from self.check_bom_inv()
