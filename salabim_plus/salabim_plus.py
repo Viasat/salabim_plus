@@ -253,7 +253,7 @@ class EntityGenerator(sim.Component):
         
         bom_requirements = [
             # (details['location'].count, '$ < '+str(details['qty'])) # <---BUG?? conditional is flipped to correctly honor
-            (details['location'].count, lambda v, c, s: v < details['qty'])
+            (details['location'].count, lambda v, c, s: v > details['qty'])
             for part, details in self.bom.items()
         ]
 #         print(bom_requirements)
