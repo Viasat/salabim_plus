@@ -176,6 +176,7 @@ class EntityGenerator(sim.Component):
         
         while True:
             yield self.wait((self.ordered_qty, lambda v, c, s: v > 0))
+
             if self.bom:
                 yield from self.check_bom_inv()
             yield from self.fulfill_order()      
@@ -252,8 +253,7 @@ class EntityGenerator(sim.Component):
         """
         
         bom_requirements = [
-            # (details['location'].count, '$ < '+str(details['qty'])) # <---BUG?? conditional is flipped to correctly honor
-            (details['location'].count, lambda v, c, s: v > details['qty'])
+            (details['location'].count, lambda v, c, s: v >= details['qty'])
             for part, details in self.bom.items()
         ]
 #         print(bom_requirements)
