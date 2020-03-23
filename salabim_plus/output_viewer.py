@@ -56,8 +56,8 @@ def get_state_df(filepath):
         # filter to state change rows
         .loc[
             lambda x: (
-                tmp['action'].str.contains('set|create|creat|crea')
-                & tmp['information'].str.contains('value')
+                x['action'].str.contains('set|create|creat|crea')
+                & x['information'].str.contains('value')
             )
         ]
         # extract state change info as separate columns
