@@ -51,10 +51,14 @@ def get_state_df(filepath):
 
     df = (
         tmp
+        .drop('line#', axis=1)
+        .fillna('')
         # filter to state change rows
         .loc[
-            tmp['action'].str.contains('set|create|creat|crea')
-            & tmp['information'].str.contains('value')
+            lambda x: (
+                tmp['action'].str.contains('set|create|creat|crea')
+                & tmp['information'].str.contains('value')
+            )
         ]
         # extract state change info as separate columns
         .assign(
