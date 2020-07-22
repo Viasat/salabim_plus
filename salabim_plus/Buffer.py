@@ -5,7 +5,7 @@ class Buffer(sim.Component):
     
     def __init__(self, activity, buffer_type, cap=np.inf, *args, **kwargs):
         
-        self.activity = activity
+        self._activity = activity
         self.buffer_type = buffer_type
         self.cap = cap
         
@@ -16,7 +16,7 @@ class Buffer(sim.Component):
         
         self._q = sim.Queue(name=self.name()+'_q')
         self._lvl = sim.State(name=self.name()+'_lvl', value=0)
-        self._is_full = sim.State(name=self.name()+'_is_full', value=False)
+        self._is_full = sim.State(name=self.name()+'_is_full', value='NO')
         self._txn = sim.State(name=self.name()+'_txn')
         self._txn_done = sim.State(name=self.name()+'_txn_done')
     
@@ -27,7 +27,7 @@ class Buffer(sim.Component):
             yield self.wait(self._txn)
             self._lvl.set(len(self._q))
             self.check_is_full()
-            self._txn_done.trigger()
+            self._txn_done.trigger(max=1)
     
     def is_full(self):
         return self._is_full.value()
@@ -44,10 +44,10 @@ class Buffer(sim.Component):
     
     def check_is_full(self):
         
-        if self.is_full():
+        if self.is_full() == 'YES':
             if self.lvl() < self.cap:
-                self._is_full.set(False)
+                self._is_full.set('NO')
             
         else:
             if self.lvl() >= self.cap:
-                self._is_full.set(True) 
+                self._is_full.set('YES') 

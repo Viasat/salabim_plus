@@ -24,5 +24,11 @@ setup(
         'numpy>=1.18.1',
         'plotly>=4.4.1',
         'salabim>=20.0.2'
-    ]
+    ],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent"
+    ],
+    python_requires='>=3.7',
 )

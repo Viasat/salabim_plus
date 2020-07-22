@@ -2,9 +2,9 @@ import salabim as sim
 
 class Entity(sim.Component):
     
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         
-        super().__init__()
+        super().__init__(*args, **kwargs)
         
         self._activity_done = sim.State(name=self.name()+'_activity_done')
         
@@ -17,11 +17,11 @@ class Entity(sim.Component):
     def b_enter(self, b):
         
         self.enter(b._q)
-        b._txn.trigger()
+        b._txn.trigger(max=1)
         yield self.wait(b._txn_done)
         
     def b_leave(self, b):
         
         self.leave(b._q)
-        b._txn.trigger()
+        b._txn.trigger(max=1)
         yield self.wait(b._txn_done)

@@ -4,10 +4,14 @@ import numpy as np
 
 class Activity(sim.Component):
     
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+    
     def setup(
         self,
-#         process_func,
-        time,
+        process_func,
+        # time,
         process_cap=1,
         in_buffer_cap=np.inf,
         out_buffer_cap=np.inf,
@@ -16,34 +20,45 @@ class Activity(sim.Component):
         out_unbatch=True,
         out_batch_qty=None
     ):
-        
-#         self.process_func = process_func
-        self.time = time
+
+        # assigning input parameters    
+        self.process_func = process_func
+        # self.time = time
+        self.process_cap = process_cap
         self.in_unbatch = in_unbatch
         self.in_batch_qty = in_batch_qty
         self.out_unbatch = out_unbatch
         self.out_batch_qty = out_batch_qty
         
+        # creating activity buffers 
         self._in_buffer = simx.Buffer(activity=self, buffer_type='in', cap=in_buffer_cap)
-        self._in_buffer.activate()
-        self._to_process = simx.Buffer(activity=self, buffer_type='to_process', cap=1)
+        # self._in_buffer.activate()
+        self._to_process = simx.Buffer(activity=self, buffer_type='to_process')
 #         self._start_staging = Buffer(activity=self, buffer_type='start_staging', cap=1)
         self._processing = simx.Buffer(activity=self, buffer_type='processing', cap=process_cap)
         self._complete = simx.Buffer(activity=self, buffer_type='complete')
         self._out_buffer = simx.Buffer(activity=self, buffer_type='out', cap=out_buffer_cap)
         
-        self._in_gate = simx.Gate(activity=self, gate_type='in', )
+        # creating activity gates
+        self._in_gate = simx.Gate(activity=self, gate_type='in')
         self._process_gate = simx.Gate(activity=self, gate_type='process')
         self._out_gate = simx.Gate(activity=self, gate_type='out')
 #         self._start_process = sim.State(name=self.name()+'_start_process')
+
+        # creating processors and unutilized processor holding area
+        self._processor_q = sim.Queue(name=self.name()+'_processor_q')
+        for _ in range(process_cap):
+            simx.Processor(activity=self)
         
-#     def process(self):
-        
-#         while True:
-#             yield self.wait((self._start_staging._lvl, self._start_staging.has_one))
-            
-#             tmp = self._start_staging.pop()
-#             tmp.time = self.time
-#             tmp._activity = self
-            
-#             tmp.activate(process='activity')
+        self._assign_processor = sim.State(name=self.name()+'_assign_processor')
+        self._processor_assigned = sim.State(name=self.name()+'_processor_assigned')
+        self._processee_q = sim.Queue(name=self.name()+'_processee_q')
+
+    def process(self):
+
+        while True:
+            yield self.wait(self._assign_processor)
+            processor = self._processor_q.pop()
+            processor.processee = self._processee_q.pop()
+            self._processor_assigned.trigger(max=1)
+            processor.activate(process="activity")
