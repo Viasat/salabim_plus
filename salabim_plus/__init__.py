@@ -7,6 +7,7 @@ from .Gate import *
 from .Processor import *
 from .Entity import *
 from .Batch import *
+from .Requestor import *
 
 __all__ = [
     # 'Entity',
@@ -25,4 +26,5 @@ __all__ = [
     'Processor',
     'Entity',
     'Batch',
+    'Requestor'
 ]
