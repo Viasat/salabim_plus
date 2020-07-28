@@ -8,6 +8,8 @@ from .Processor import *
 from .Entity import *
 from .Batch import *
 from .Requestor import *
+from .xResource import *
+from .Scheduler import *
 
 __all__ = [
     # 'Entity',
@@ -26,5 +28,7 @@ __all__ = [
     'Processor',
     'Entity',
     'Batch',
-    'Requestor'
+    'Requestor',
+    'xResource',
+    'Scheduler'
 ]

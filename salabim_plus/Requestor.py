@@ -24,3 +24,12 @@ class Requestor(sim.Component):
         self.release()
         yield self._released.set('YES')
         self.cancel()   
+
+    def changeover_request(self):
+
+        yield self.request(self.requested)
+        self._processor.resume()
+        yield self.wait((self._done, 'YES'))
+        self.release()
+        yield self._released.set('YES')
+        self.cancel() 
