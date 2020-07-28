@@ -1,4 +1,5 @@
 import salabim as sim
+import salabim_plus as simx
 import numpy as np
 
 class Buffer(sim.Component):
@@ -20,6 +21,9 @@ class Buffer(sim.Component):
         self._txn = sim.State(name=self.name()+'_txn')
         self._txn_done = sim.State(name=self.name()+'_txn_done')
 
+        self._an_textcolor = self._activity._an_textcolor
+        self._an_text = str(self.lvl())
+
         self._make_animation()
     
     def process(self):
@@ -27,9 +31,9 @@ class Buffer(sim.Component):
         while True:
             yield self.wait(self._txn)
             self._lvl.set(len(self._q))
+            # self._an_text = str(self.lvl())
             self.check_is_full()
             self._txn_done.trigger(max=1)
-            self._make_animation()
     
     def is_full(self):
         return self._is_full.value()
@@ -47,55 +51,48 @@ class Buffer(sim.Component):
     def _make_animation(self):
 
         if self._activity.animate:
-            print(f'buffer test {self._activity.name()} {self.buffer_type}')
 
             x, y, text_anchor = self._get_an_xy()
 
-            if self.is_full() == 'YES':
-                textcolor = "red"
-            else:
-                textcolor = self._activity.textcolor
-
             sim.AnimateText(
-                text=str(self.lvl()),
+                text=self.an_text,
                 x = x,
                 y = y,
                 text_anchor = text_anchor,
-                textcolor = textcolor,
+                textcolor = self.an_textcolor,
                 arg = self
-                # parent = self
             )
 
     def _get_an_xy(self):
 
         if self.buffer_type == 'in':
-            x = self._activity.x + self._activity.w*0.1
-            y = self._activity.y - self._activity.h*0.1
+            x = self._activity._x + self._activity._w*0.1
+            y = self._activity._y - self._activity._h*0.1
             text_anchor = "nw"
 
         elif self.buffer_type == 'to_process':
-            x = self._activity.x + self._activity.w*0.1
-            y = self._activity.y + self._activity.h - self._activity.h*0.1
+            x = self._activity._x + self._activity._w*0.1
+            y = self._activity._y + self._activity._h - self._activity._h*0.1
             text_anchor = "sw"
 
         elif self.buffer_type == 'processing':
-            x = self._activity.x + self._activity.w*0.5
-            y = self._activity.y + self._activity.h*0.5
+            x = self._activity._x + self._activity._w*0.5
+            y = self._activity._y + self._activity._h*0.5
             text_anchor = "c"
 
         elif self.buffer_type == 'complete':
-            x = self._activity.x + self._activity.w - self._activity.w*0.1
-            y = self._activity.y + self._activity.h - self._activity.h*0.1
+            x = self._activity._x + self._activity._w - self._activity._w*0.1
+            y = self._activity._y + self._activity._h - self._activity._h*0.1
             text_anchor = "se"
 
         elif self.buffer_type == 'out':
-            x = self._activity.x + self._activity.w - self._activity.w*0.1
-            y = self._activity.y - self._activity.h*0.1
+            x = self._activity._x + self._activity._w - self._activity._w*0.1
+            y = self._activity._y - self._activity._h*0.1
             text_anchor = "ne"
 
         else:
-            x = self._activity.x
-            y = self._activity.y
+            x = self._activity._x
+            y = self._activity._y
             text_anchor = "e"
 
         return (x, y, text_anchor)
@@ -105,7 +102,26 @@ class Buffer(sim.Component):
         if self.is_full() == 'YES':
             if self.lvl() < self.cap:
                 self._is_full.set('NO')
+                self._an_textcolor = self._activity._an_textcolor
             
         else:
             if self.lvl() >= self.cap:
                 self._is_full.set('YES') 
+                self._an_textcolor = "red"
+
+    def an_textcolor(self, t):
+        return self._an_textcolor
+
+    def an_text(self, t):
+        return str(self.lvl())
+        
+        # tmp = str(
+        #     sum(
+        #         [len(x.contents) if isinstance(x, simx.Batch) else 1 for x in self._q]
+        #     )
+        # )
+
+        # if tmp == str(self.lvl()):
+        #     return str(self.lvl())
+        # else:
+        #     return str(self.lvl()) + ' (' + tmp + ')'

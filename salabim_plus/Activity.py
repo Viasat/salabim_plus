@@ -19,12 +19,12 @@ class Activity(sim.Component):
         out_unbatch=True,
         out_batch_qty=None,
         animate=False,
-        x=None,
-        y=None,
-        w=None,
-        h=None,
-        fillcolor="blue",
-        textcolor="white"
+        x=0,
+        y=0,
+        w=50,
+        h=30,
+        an_fillcolor="blue",
+        an_textcolor="white"
     ):
 
         # assigning input parameters    
@@ -34,13 +34,15 @@ class Activity(sim.Component):
         self.in_batch_qty = in_batch_qty
         self.out_unbatch = out_unbatch
         self.out_batch_qty = out_batch_qty
+        
+        # animation specific parameters
         self.animate = animate
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.fillcolor = fillcolor
-        self.textcolor = textcolor
+        self._x = x
+        self._y = y
+        self._w = w
+        self._h = h
+        self._an_fillcolor = an_fillcolor
+        self._an_textcolor = an_textcolor
         
         # creating activity buffers 
         self._in_buffer = simx.Buffer(activity=self, buffer_type='in', cap=in_buffer_cap)
@@ -78,16 +80,32 @@ class Activity(sim.Component):
     def _make_animation(self):
 
         if self.animate:
-            print(f'test {self.name()}')
             sim.AnimateRectangle(
-                spec=(0, 0, self.w, self.h),
-                x=self.x,
-                y=self.y,
+                spec=(0, 0, self._w, self._h),
+                x=self._x,
+                y=self._y,
                 xy_anchor="nw",
-                fillcolor=self.fillcolor,
-                text=self.name(),
-                textcolor=self.textcolor,
+                fillcolor=self.an_fillcolor,
+                text=self._name,
+                textcolor=self.an_textcolor,
                 text_anchor="c",
                 arg = self
-                # parent=self,
             )
+
+    def x(self, t):
+        return self._x
+
+    def y(self, t):
+        return self._y
+
+    def h(self, t):
+        return self._h
+
+    def w(self, t):
+        return self._w
+
+    def an_fillcolor(self, t):
+        return self._an_fillcolor
+
+    def an_textcolor(self, t):
+        return self._an_textcolor
