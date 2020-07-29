@@ -7,21 +7,19 @@ class Entity(sim.Component):
         super().__init__(*args, **kwargs)
         
         self._activity_done = sim.State(name=self.name()+'_activity_done')
-        
-    # def activity(self):
-        
-    #     yield self.hold(self.time)
-    #     self.exit(self._activity._processing._q)
-    #     self.enter(self._activity._complete._q)
+        self._routing_done = sim.State(name=self.name()+'_routing_done')
+        self._activity = None
         
     def b_enter(self, b):
         
         self.enter(b._q)
         b._txn.trigger(max=1)
         yield self.wait(b._txn_done)
+        self._routing_done.trigger(max=1)
         
     def b_leave(self, b):
         
         self.leave(b._q)
         b._txn.trigger(max=1)
         yield self.wait(b._txn_done)
+        self._routing_done.trigger(max=1)

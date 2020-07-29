@@ -14,10 +14,10 @@ class Activity(sim.Component):
         process_cap=1,
         in_buffer_cap=np.inf,
         out_buffer_cap=np.inf,
-        in_unbatch=False,
-        in_batch_qty=1,
-        out_unbatch=True,
-        out_batch_qty=None,
+        in_batch_type=None,
+        in_batch_size=None,
+        out_batch_type=None,
+        out_batch_size=None,
         animate=False,
         x=0,
         y=0,
@@ -30,10 +30,10 @@ class Activity(sim.Component):
         # assigning input parameters    
         self.process_func = process_func
         self.process_cap = process_cap
-        self.in_unbatch = in_unbatch
-        self.in_batch_qty = in_batch_qty
-        self.out_unbatch = out_unbatch
-        self.out_batch_qty = out_batch_qty
+        self.in_batch_type = in_batch_type
+        self.in_batch_size = in_batch_size
+        self.out_batch_type = out_batch_type
+        self.out_batch_size = out_batch_size
         
         # animation specific parameters
         self.animate = animate
@@ -52,9 +52,9 @@ class Activity(sim.Component):
         self._out_buffer = simx.Buffer(activity=self, buffer_type='out', cap=out_buffer_cap)
         
         # creating activity gates
-        self._in_gate = simx.Gate(activity=self, gate_type='in')
+        self._in_gate = simx.Gate(activity=self, gate_type='in', batch_type=in_batch_type, batch_size=in_batch_size)
         self._process_gate = simx.Gate(activity=self, gate_type='process')
-        self._out_gate = simx.Gate(activity=self, gate_type='out')
+        self._out_gate = simx.Gate(activity=self, gate_type='out', batch_type=out_batch_type, batch_size=out_batch_size)
 
         # creating processors and unutilized processor holding area
         self._processor_q = sim.Queue(name=self.name()+'_processor_q')
@@ -81,14 +81,15 @@ class Activity(sim.Component):
 
         if self.animate:
             sim.AnimateRectangle(
-                spec=(0, 0, self._w, self._h),
-                x=self._x,
-                y=self._y,
-                xy_anchor="nw",
+                spec=lambda activity, t: (0, 0, activity.w(t), activity.h(t)),
+                x=self.x,
+                y=self.y,
+                xy_anchor="sw",
                 fillcolor=self.an_fillcolor,
-                text=self._name,
+                text=self.name(),
                 textcolor=self.an_textcolor,
-                text_anchor="c",
+                text_anchor="n",
+                layer = 1,
                 arg = self
             )
 

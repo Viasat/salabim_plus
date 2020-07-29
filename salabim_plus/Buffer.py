@@ -11,7 +11,7 @@ class Buffer(sim.Component):
         self.cap = cap
         
         name = '_'.join([activity.name(), buffer_type, 'buffer'])
-        super().__init__(name=name, *args, **kwargs)
+        super().__init__(name=name, urgent=True, *args, **kwargs)
     
     def setup(self):
         
@@ -33,7 +33,7 @@ class Buffer(sim.Component):
             self._lvl.set(len(self._q))
             # self._an_text = str(self.lvl())
             self.check_is_full()
-            self._txn_done.trigger(max=1)
+            self._txn_done.trigger()
     
     def is_full(self):
         return self._is_full.value()
@@ -60,34 +60,35 @@ class Buffer(sim.Component):
                 y = y,
                 text_anchor = text_anchor,
                 textcolor = self.an_textcolor,
+                layer = 0,
                 arg = self
             )
 
     def _get_an_xy(self):
 
         if self.buffer_type == 'in':
-            x = self._activity._x + self._activity._w*0.1
-            y = self._activity._y - self._activity._h*0.1
+            x = self._activity._x + (self._activity._w*0.1)
+            y = self._activity._y + self._activity._h - (self._activity._h*0.1)
             text_anchor = "nw"
 
         elif self.buffer_type == 'to_process':
-            x = self._activity._x + self._activity._w*0.1
-            y = self._activity._y + self._activity._h - self._activity._h*0.1
+            x = self._activity._x + (self._activity._w*0.1)
+            y = self._activity._y + (self._activity._h*0.1)
             text_anchor = "sw"
 
         elif self.buffer_type == 'processing':
-            x = self._activity._x + self._activity._w*0.5
-            y = self._activity._y + self._activity._h*0.5
+            x = self._activity._x + (self._activity._w*0.5)
+            y = self._activity._y + (self._activity._h*0.5)
             text_anchor = "c"
 
         elif self.buffer_type == 'complete':
-            x = self._activity._x + self._activity._w - self._activity._w*0.1
-            y = self._activity._y + self._activity._h - self._activity._h*0.1
+            x = self._activity._x + self._activity._w - (self._activity._w*0.1)
+            y = self._activity._y + (self._activity._h*0.1)
             text_anchor = "se"
 
         elif self.buffer_type == 'out':
-            x = self._activity._x + self._activity._w - self._activity._w*0.1
-            y = self._activity._y - self._activity._h*0.1
+            x = self._activity._x + self._activity._w - (self._activity._w*0.1)
+            y = self._activity._y + self._activity._h - (self._activity._h*0.1)
             text_anchor = "ne"
 
         else:
@@ -113,15 +114,17 @@ class Buffer(sim.Component):
         return self._an_textcolor
 
     def an_text(self, t):
-        return str(self.lvl())
-        
-        # tmp = str(
-        #     sum(
-        #         [len(x.contents) if isinstance(x, simx.Batch) else 1 for x in self._q]
-        #     )
-        # )
 
-        # if tmp == str(self.lvl()):
-        #     return str(self.lvl())
-        # else:
-        #     return str(self.lvl()) + ' (' + tmp + ')'
+        batches = [x for x in self._q if isinstance(x, simx.Batch)]
+
+        if len(batches) == 0:
+            return str(self.lvl())
+
+        else:
+            tmp = str(
+                sum(
+                    [len(x.contents) if isinstance(x, simx.Batch) else 1 for x in self._q]
+                )
+            )
+
+            return str(self.lvl()) + ' (' + tmp + ')'

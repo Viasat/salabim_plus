@@ -12,7 +12,7 @@ class Gate(sim.Component):
         self.on_move = []
         
         name = '_'.join([activity.name(), gate_type, 'gate'])
-        super().__init__(name=name, *args, **kwargs)
+        super().__init__(name=name, urgent=True, *args, **kwargs)
         
     def setup(self):
         
@@ -43,11 +43,13 @@ class Gate(sim.Component):
                 yield self.wait((self.ingress._lvl, lambda v,c,s: v>0))
                 
                 yield from self.pull()
+                print(f'on move length: {len(self.on_move)} at {self.env.now()}')
                 self.unbatch()
+                print(f'on move length: {len(self.on_move)} at {self.env.now()}')
                 yield from self.put()
                 
             elif self.batch_type == 'batch':
-                yield self.wait((self.ingress._lvl, lambda v,c,s: v>self.batch_size))
+                yield self.wait((self.ingress._lvl, lambda v,c,s: v>=self.batch_size))
                 
                 yield from self.pull(amt=self.batch_size)
                 self.batch()
@@ -60,7 +62,10 @@ class Gate(sim.Component):
                 yield from self.put()
             
             if self.gate_type == 'out':
-                self.on_move[0]._activity_done.trigger(max=1)
+                for e in self.on_move:
+                    e._activity_done.trigger(max=1)
+                    yield self.wait(e._routing_done)
+                # self.on_move[0]._activity_done.trigger(max=1)
             
             elif self.gate_type == 'process':
                 self.on_move[0].enter(self._activity._processee_q)
@@ -94,6 +99,9 @@ class Gate(sim.Component):
         
         for e in self.on_move:
             e.enter(self.egress._q)
-            
+
+            if self.gate_type=='out':
+                print(f'{e.name()} entered at {self.env.now()}')
+
         self.egress._txn.trigger(max=1)
         yield self.wait(self.egress._txn_done)
