@@ -43,9 +43,7 @@ class Gate(sim.Component):
                 yield self.wait((self.ingress._lvl, lambda v,c,s: v>0))
                 
                 yield from self.pull()
-                print(f'on move length: {len(self.on_move)} at {self.env.now()}')
                 self.unbatch()
-                print(f'on move length: {len(self.on_move)} at {self.env.now()}')
                 yield from self.put()
                 
             elif self.batch_type == 'batch':
@@ -99,9 +97,6 @@ class Gate(sim.Component):
         
         for e in self.on_move:
             e.enter(self.egress._q)
-
-            if self.gate_type=='out':
-                print(f'{e.name()} entered at {self.env.now()}')
 
         self.egress._txn.trigger(max=1)
         yield self.wait(self.egress._txn_done)
