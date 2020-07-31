@@ -1,6 +1,9 @@
 import salabim as sim
 
 class Entity(sim.Component):
+    """
+    Entity object
+    """
     
     def __init__(self, *args, **kwargs):
         
